@@ -1,53 +1,48 @@
-import { initializeApp } from "firebase/app";
-import { getAuth, signInWithCustomToken, signInAnonymously } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
+// Simulated user authentication for development
+// Replaces Firebase authentication with local user simulation
 
-// Firebase configuration from environment
-// Firebase configuration using environment variables
-const firebaseConfig = window.__firebase_config || {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID
-};
-
-// Validate Firebase configuration
-const validateFirebaseConfig = () => {
-  const required = ['apiKey', 'authDomain', 'projectId', 'storageBucket', 'messagingSenderId', 'appId'];
-  const missing = required.filter(key => !firebaseConfig[key]);
-  
-  if (missing.length > 0) {
-    console.error('Missing Firebase configuration:', missing);
-    throw new Error(`Missing Firebase environment variables: ${missing.join(', ')}`);
+const generateUserId = () => {
+  let userId = localStorage.getItem('simulated_user_id');
+  if (!userId) {
+    userId = `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    localStorage.setItem('simulated_user_id', userId);
   }
+  return userId;
 };
 
-// Validate configuration before initializing
-validateFirebaseConfig();
+const createSimulatedUser = () => {
+  const userId = generateUserId();
+  return {
+    uid: userId,
+    email: `${userId}@example.com`,
+    displayName: 'Demo User',
+    isAnonymous: false,
+    createdAt: new Date().toISOString(),
+    lastLoginAt: new Date().toISOString()
+  };
+};
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-export const auth = getAuth(app);
-export const db = getFirestore(app);
-
-// Authentication helper
+// Authentication helper - now returns simulated user
 export const authenticateUser = async () => {
   try {
-    const initialToken = window.__initial_auth_token;
+    // Simulate network delay
+    await new Promise(resolve => setTimeout(resolve, 500));
     
-    if (initialToken) {
-      await signInWithCustomToken(auth, initialToken);
-    } else {
-      await signInAnonymously(auth);
-    }
+    const user = createSimulatedUser();
+    console.log("Simulated user authenticated:", user.uid);
     
-    return auth.currentUser;
+    return user;
   } catch (error) {
-    console.error("Authentication error:", error);
+    console.error("Simulated authentication error:", error);
     throw error;
   }
 };
 
-export default app;
+// Export simulated user for compatibility
+export const auth = {
+  currentUser: null
+};
+
+export const db = null; // No longer used
+
+export default null;
