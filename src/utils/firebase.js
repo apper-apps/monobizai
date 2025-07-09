@@ -3,14 +3,29 @@ import { getAuth, signInWithCustomToken, signInAnonymously } from "firebase/auth
 import { getFirestore } from "firebase/firestore";
 
 // Firebase configuration from environment
+// Firebase configuration using environment variables
 const firebaseConfig = window.__firebase_config || {
-  apiKey: "demo-key",
-  authDomain: "demo-project.firebaseapp.com",
-  projectId: "demo-project",
-  storageBucket: "demo-project.appspot.com",
-  messagingSenderId: "123456789",
-  appId: "1:123456789:web:abcdef123456"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
+
+// Validate Firebase configuration
+const validateFirebaseConfig = () => {
+  const required = ['apiKey', 'authDomain', 'projectId', 'storageBucket', 'messagingSenderId', 'appId'];
+  const missing = required.filter(key => !firebaseConfig[key]);
+  
+  if (missing.length > 0) {
+    console.error('Missing Firebase configuration:', missing);
+    throw new Error(`Missing Firebase environment variables: ${missing.join(', ')}`);
+  }
+};
+
+// Validate configuration before initializing
+validateFirebaseConfig();
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
